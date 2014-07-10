@@ -5,9 +5,9 @@ import java.util.Set;
 
 import robot.client.RemoteRobot;
 
-public class FillRect {
+public class FillAround {
   public static void main(String[] args) {
-    new FillRect().run();
+    new FillAround().run();
     System.out.println("COMPLETE");
   }
   
@@ -47,7 +47,7 @@ public class FillRect {
     return paintedSet.contains(new Point(x, y));
   }
   
-  public FillRect() {
+  public FillAround() {
     r = new RemoteRobot("127.0.0.1", 8080);
   }
   
