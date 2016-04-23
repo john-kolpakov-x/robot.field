@@ -8,7 +8,7 @@ public class FillRegion {
   }
   
   public FillRegion() {
-    r = new RemoteRobot("127.0.0.1", 8080);
+    r = new RemoteRobot("127.0.0.1", 1921);
   }
   
   final RemoteRobot r;
@@ -24,6 +24,8 @@ public class FillRegion {
       }
       r.down();
     }
+
+    System.out.println("Complete");
   }
   
 }
