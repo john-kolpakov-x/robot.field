@@ -10,7 +10,7 @@ public class GoCherezKolidor {
   private final AroundRobot r;
   
   public GoCherezKolidor() {
-    r = new AroundRobot(new RemoteRobot("127.0.0.1", 8080));
+    r = new AroundRobot(new RemoteRobot("127.0.0.1", 1921));
   }
   
   private void run() {
