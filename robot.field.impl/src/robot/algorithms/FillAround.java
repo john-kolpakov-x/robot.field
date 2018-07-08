@@ -6,7 +6,8 @@ import java.util.Set;
 import robot.client.RemoteRobot;
 
 public class FillAround {
-  public static void main(String[] args) {
+  public static void main(String[] args) throws InterruptedException {
+    Thread.sleep(3000);
     new FillAround().run();
     System.out.println("COMPLETE");
   }

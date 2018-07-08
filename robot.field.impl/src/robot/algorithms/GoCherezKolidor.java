@@ -3,7 +3,8 @@ package robot.algorithms;
 import robot.client.RemoteRobot;
 
 public class GoCherezKolidor {
-  public static void main(String[] args) {
+  public static void main(String[] args) throws Exception {
+    Thread.sleep(3000);
     new GoCherezKolidor().run();
   }
   

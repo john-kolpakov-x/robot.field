@@ -263,7 +263,7 @@ public class FieldModel {
   
   public void loadFromStream(InputStream in) throws Exception {
     BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
-    String line = null;
+    String line;
     while ((line = br.readLine()) != null) {
       readLine(line);
     }

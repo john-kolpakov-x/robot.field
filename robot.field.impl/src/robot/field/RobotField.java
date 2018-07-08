@@ -65,10 +65,9 @@ public class RobotField extends PositionAbstractFrame {
       } catch (Exception e) {
         throw new RuntimeException(e);
       }
-      pan.setDefaultCloseOperation(EXIT_ON_CLOSE);
+      pan.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
       pan.setVisible(true);
-
 
       SwingUtilities.invokeLater(() -> {
         try {

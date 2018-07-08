@@ -6,14 +6,20 @@ import robot.util.Handler;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
-import java.awt.Color;
-import java.awt.Graphics;
+import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.regex.Matcher;
@@ -54,11 +60,11 @@ public class FieldPanel extends JPanel {
       @Override
       public void mousePressed(MouseEvent e) {
         if (e.getButton() == MouseEvent.BUTTON1) {
-          leftMousePressed(e);
+          rightMousePressed(e);
         }
 
         if (e.getButton() == MouseEvent.BUTTON3) {
-          rightMousePressed(e);
+          leftMousePressed(e);
         }
       }
     });
@@ -69,7 +75,7 @@ public class FieldPanel extends JPanel {
         int x = e.getX();
         int y = e.getY();
         label1 = "MOUSE " + x + ", " + y;
-        FieldPanel.this.repaint();
+        markForRepaint();
       }
     });
 
@@ -166,66 +172,6 @@ public class FieldPanel extends JPanel {
 
   }
 
-  private void rightMousePressed(MouseEvent e) {
-    int x = e.getX();
-    int y = e.getY();
-
-    int top = y - yOffset;
-
-    boolean borderTop = false, borderLeft = false;
-
-    int j = -1, jMod = -1;
-    if (top >= 0) {
-      j = top / cellHeight;
-      jMod = top % cellHeight;
-    }
-
-    int left = x - xOffset;
-
-    int i = -1, iMod = -1;
-    if (left >= 0) {
-      i = left / cellWidth;
-      iMod = left % cellWidth;
-    }
-
-    int save_di = i, save_dj = j;
-
-    if (0 <= jMod && jMod <= 3) {
-      borderTop = true;
-    } else {
-      int tmp = cellHeight - jMod;
-      if (1 <= tmp && tmp <= 4) {
-        j++;
-        borderTop = true;
-      }
-    }
-
-    if (0 <= iMod && iMod <= 3) {
-      borderLeft = true;
-    } else {
-      int tmp = cellWidth - iMod;
-      if (1 <= tmp && tmp <= 4) {
-        i++;
-        borderLeft = true;
-      }
-    }
-
-    if (borderLeft && borderTop) {
-      borderLeft = borderTop = false;
-      i = save_di;
-      j = save_dj;
-    }
-
-    if (borderLeft) return;
-    if (borderTop) return;
-
-    selectedI = i;
-    selectedJ = j;
-
-    label3 = "selected (I, J) = (" + selectedI + ", " + selectedJ + ")";
-    repaint();
-  }
-
   private void leftMousePressed(MouseEvent e) {
     int x = e.getX();
     int y = e.getY();
@@ -250,7 +196,67 @@ public class FieldPanel extends JPanel {
 
     int save_di = i, save_dj = j;
 
-    if (0 <= jMod && jMod <= 3) {
+    if (0 <= jMod && 3 >= jMod) {
+      borderTop = true;
+    } else {
+      int tmp = cellHeight - jMod;
+      if (1 <= tmp && tmp <= 4) {
+        borderTop = true;
+        j++;
+      }
+    }
+
+    if (iMod >= 0 && iMod <= 3) {
+      borderLeft = true;
+    } else {
+      int tmp = cellWidth - iMod;
+      if (1 <= tmp && tmp <= 4) {
+        i++;
+        borderLeft = true;
+      }
+    }
+
+    if (borderLeft && borderTop) {
+      borderLeft = borderTop = false;
+      i = save_di;
+      j = save_dj;
+    }
+
+    if (borderLeft) return;
+    if (borderTop) return;
+
+    selectedI = i;
+    selectedJ = j;
+
+    label3 = "selected (I, J) = (" + selectedI + ", " + selectedJ + ")";
+    markForRepaint();
+  }
+
+  private void rightMousePressed(MouseEvent e) {
+    int x = e.getX();
+    int y = e.getY();
+
+    int top = y - yOffset;
+
+    boolean borderTop = false, borderLeft = false;
+
+    int j = -1, jMod = -1;
+    if (top >= 0) {
+      j = top / cellHeight;
+      jMod = top % cellHeight;
+    }
+
+    int left = x - xOffset;
+
+    int i = -1, iMod = -1;
+    if (left >= 0) {
+      i = left / cellWidth;
+      iMod = left % cellWidth;
+    }
+
+    int save_di = i, save_dj = j;
+
+    if (jMod <= 3 && 0 <= jMod) {
       borderTop = true;
     } else {
       int tmp = cellHeight - jMod;
@@ -265,8 +271,8 @@ public class FieldPanel extends JPanel {
     } else {
       int tmp = cellWidth - iMod;
       if (1 <= tmp && tmp <= 4) {
-        i++;
         borderLeft = true;
+        i++;
       }
     }
 
@@ -292,7 +298,7 @@ public class FieldPanel extends JPanel {
 
     label2 = "j = " + j + ", jMod = " + jMod + ", i = " + i + ", iMod = " + iMod;
     label3 = "borderLeft = " + borderLeft + ", borderTop = " + borderTop;
-    repaint();
+    markForRepaint();
   }
 
   private void keyPushed(final FieldModel fieldModel, KeyEvent e) {
@@ -302,7 +308,7 @@ public class FieldPanel extends JPanel {
       fieldModel.robotX = selectedI;
       fieldModel.robotY = selectedJ;
       fieldModel.robotStatus = RobotStatus.NORMAL;
-      repaint();
+      markForRepaint();
       return;
     }
 
@@ -368,7 +374,7 @@ public class FieldPanel extends JPanel {
   private void saveInner() throws FileNotFoundException {
     fieldModel.saveToStream(new FileOutputStream(selectedFile));
     label3 = "saved to " + selectedFile;
-    repaint();
+    markForRepaint();
   }
 
   private void save() {
@@ -458,8 +464,9 @@ public class FieldPanel extends JPanel {
     File selFile = fc.getSelectedFile();
 
     if (!selFile.exists()) {
-      JOptionPane.showMessageDialog(this, "Не существует выбранного файла " + selFile, "Ошибка",
-        JOptionPane.ERROR_MESSAGE);
+      JOptionPane.showMessageDialog(this,
+        "Не существует выбранного файла " + selFile,
+        "Ошибка", JOptionPane.ERROR_MESSAGE);
       return;
     }
 
@@ -473,7 +480,7 @@ public class FieldPanel extends JPanel {
   private void loadInner() throws Exception {
     fieldModel.clean();
     if (selectedFile != null) fieldModel.loadFromStream(new FileInputStream(selectedFile));
-    repaint();
+    markForRepaint();
   }
 
   public File selectedFile() {
@@ -506,7 +513,7 @@ public class FieldPanel extends JPanel {
       fieldModel.rowCount = a1;
       fieldModel.colCount = a2;
       selectedFile = null;
-      repaint();
+      markForRepaint();
 
       update();
 
@@ -556,13 +563,13 @@ public class FieldPanel extends JPanel {
       try {
         newPort = Integer.parseInt(strPort);
       } catch (NumberFormatException e) {
-        JOptionPane.showMessageDialog(this, "Необходимо ввести число", "Ошибка ввода",
-          JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(this, "Необходимо ввести число", "Ошибка ввода", JOptionPane.ERROR_MESSAGE);
         continue;
       }
 
       if (newPort <= 1024 || newPort >= 65536) {
-        JOptionPane.showMessageDialog(this, "Порт может быть в диапазоне от 1025 до 65535",
+        JOptionPane.showMessageDialog(this,
+          "Порт может быть в диапазоне от 1025 до 65535",
           "Ошибка ввода", JOptionPane.ERROR_MESSAGE);
         continue;
       }
@@ -586,8 +593,7 @@ public class FieldPanel extends JPanel {
       update();
       return true;
     } catch (SecurityException e) {
-      JOptionPane.showMessageDialog(this, "Порт занят: " + e.getMessage(), "Ошибка ввода",
-        JOptionPane.ERROR_MESSAGE);
+      JOptionPane.showMessageDialog(this, "Порт занят: " + e.getMessage(), "Ошибка ввода", JOptionPane.ERROR_MESSAGE);
       return false;
     }
   }
@@ -605,6 +611,7 @@ public class FieldPanel extends JPanel {
     if (ss == null) return;
     while (!ss.isClosed()) {
       Socket s = ss.accept();
+      Thread.sleep(100);
       BufferedReader rd = new BufferedReader(new InputStreamReader(s.getInputStream(), "UTF-8"));
       final String line = rd.readLine();
       final String response[] = new String[]{null};
@@ -620,7 +627,6 @@ public class FieldPanel extends JPanel {
     try {
       String ret = executeRequestInner(in);
       if (ret == null) ret = "OK";
-      Thread.sleep(100);
       return ret;
     } catch (Exception e) {
       e.printStackTrace();
@@ -631,44 +637,48 @@ public class FieldPanel extends JPanel {
   private void right() {
     if (fieldModel.getBorderRight(fieldModel.robotX, fieldModel.robotY)) {
       fieldModel.robotStatus = RobotStatus.BOOM_RIGHT;
-      repaint();
+      markForRepaint();
       throw new Boom();
     }
     fieldModel.robotX++;
     fieldModel.robotStatus = RobotStatus.NORMAL;
-    repaint();
+    markForRepaint();
   }
 
   private void left() {
     if (fieldModel.getBorderLeft(fieldModel.robotX, fieldModel.robotY)) {
       fieldModel.robotStatus = RobotStatus.BOOM_LEFT;
-      repaint();
+      markForRepaint();
       throw new Boom();
     }
     fieldModel.robotX--;
     fieldModel.robotStatus = RobotStatus.NORMAL;
-    repaint();
+    markForRepaint();
   }
 
   private void down() {
     if (fieldModel.getBorderBottom(fieldModel.robotX, fieldModel.robotY)) {
       fieldModel.robotStatus = RobotStatus.BOOM_BOTTOM;
-      repaint();
+      markForRepaint();
       throw new Boom();
     }
     fieldModel.robotY++;
     fieldModel.robotStatus = RobotStatus.NORMAL;
-    repaint();
+    markForRepaint();
   }
 
   private void up() {
     if (fieldModel.getBorderTop(fieldModel.robotX, fieldModel.robotY)) {
       fieldModel.robotStatus = RobotStatus.BOOM_TOP;
-      repaint();
+      markForRepaint();
       throw new Boom();
     }
     fieldModel.robotY--;
     fieldModel.robotStatus = RobotStatus.NORMAL;
+    markForRepaint();
+  }
+
+  private void markForRepaint() {
     repaint();
   }
 
@@ -708,7 +718,7 @@ public class FieldPanel extends JPanel {
     }
     if ("paint".equals(in)) {
       fieldModel.setPainted(fieldModel.robotX, fieldModel.robotY, true);
-      repaint();
+      markForRepaint();
       return null;
     }
 

@@ -3,7 +3,8 @@ package robot.algorithms;
 import robot.client.RemoteRobot;
 
 public class FillRegion {
-  public static void main(String[] args) {
+  public static void main(String[] args) throws InterruptedException {
+    Thread.sleep(3000);
     new FillRegion().run();
   }
   

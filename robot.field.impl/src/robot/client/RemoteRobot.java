@@ -19,17 +19,13 @@ public class RemoteRobot implements Robot {
   
   private String request(String in) {
     try {
-      Socket s = new Socket(host, port);
-      
-      try {
+      try (Socket s = new Socket(host, port)) {
         PrintStream out = new PrintStream(s.getOutputStream(), false, "UTF-8");
         out.println(in);
         out.flush();
-        
+
         BufferedReader rd = new BufferedReader(new InputStreamReader(s.getInputStream(), "UTF-8"));
         return rd.readLine();
-      } finally {
-        s.close();
       }
     } catch (Exception e) {
       throw new RuntimeException(e);
